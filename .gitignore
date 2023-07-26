@@ -1,6 +1,21 @@
+#IDEs
+*.idea/
+*.vscode/
+# Local History for Visual Studio Code
+.history/
+# Built Visual Studio Code Extensions
+*.vsix
+
+resources/VN100 IMU/labview/*
+resources/VN100 IMU/matlab/*
+resources/VN100 IMU/net/*
+resources/VN100 IMU/unity/*
+
 devel/
 logs/
+log/
 build/
+install/
 bin/
 lib/
 msg_gen/
@@ -49,3 +64,38 @@ qtcreator-*
 
 # Catkin custom files
 CATKIN_IGNORE
+
+# CMake 
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Testing
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+
+#LINUX
+# temporary files which can be created if a process still has a handle open of a deleted file
+.fuse_hidden*
+# KDE directory preferences
+.directory
+# Linux trash folder which might appear on any partition or disk
+.Trash-*
+# .nfs files are created when an open file is removed but is still being accessed
+.nfs*
+
+# General
+.DS_Store
+.AppleDouble
+.LSOverride
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+# Folder config file
+[Dd]esktop.ini
