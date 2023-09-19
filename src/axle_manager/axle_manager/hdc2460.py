@@ -1,14 +1,11 @@
 import serial
 from utilities.utilities.tools import Tools
 
-baudRate = 115200
-min_speed=-3
-max_speed=3
-
 class Hdc2460():
 
-    def __init__(self, serialPort:str):
-        self.port = serial.Serial(serialPort, baudRate, timeout=2, xonxoff=False, rtscts=False, dsrdtr=False)
+    def __init__(self, serialPort:str,bitRate:int,maxSpeed:int):
+        self.port = serial.Serial(serialPort, bitRate, timeout=2, xonxoff=False, rtscts=False, dsrdtr=False)
+        self.maxSpeed = maxSpeed
 
     def  isConnected(self) -> bool:
         return self.port.is_open
@@ -19,20 +16,20 @@ class Hdc2460():
 
     def move(self, left_speed:float, right_speed:float):
         """Tells the HDC2460 to move at set speed"""
+        left_speed = round(left_speed*1000)
+        right_speed = round(right_speed*1000)
 
         #clamp speed, format, and send it of to the roboteq
-        left_speed = Tools.clamp(left_speed, min_speed, max_speed)
-        right_speed = Tools.clamp(right_speed, min_speed, max_speed)
+        left_speed = Tools.clamp(left_speed, -self.maxSpeed, self.maxSpeed)
+        right_speed = Tools.clamp(right_speed, -self.maxSpeed, self.maxSpeed)
 
-        if right_speed < 0:        
-            self.send_Command("!a{right_speed:.2f}")        
-        else:       
-            self.send_Command("!A{right_speed:.2f}") 
-        
-        if left_speed < 0:        
-            self.send_Command("!b{right_speed:.2f}")        
-        else:       
-            self.send_Command("!B{right_speed:.2f}") 
+        self.send_Command("!G 2 {left_speed}") 
+        self.send_Command("!G 1 {right_speed}")  
+
+    def resetDigitalOut(self, bit:int):
+        """"Will turn off digital output selected by the bit number."""
+        self.send_Command("!D0 {bit}")  
+
 
     def close(self):
         self.port.close()

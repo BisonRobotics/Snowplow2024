@@ -3,17 +3,25 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from axle_manager.hdc2460 import Hdc2460
 
-facSerialPort = '/dev/ttyACM0'
-bacSerialPort = '/dev/ttyACM1'
-
 class Hdc2460Node(Node):
     def __init__(self):
         super().__init__("hdc2460")
+        self.declare_parameter('facSerialPort',rclpy.Parameter.Type.STRING)
+        self.declare_parameter('bacSerialPort',rclpy.Parameter.Type.STRING)
+        self.declare_parameter('serialBitRate',rclpy.Parameter.Type.INTEGER)
+        self.declare_parameter('maxSpeed',rclpy.Parameter.Type.INTEGER)
+
         self.subscription = self.create_subscription(Twist, '/cmd_vel', self.callback, 10)
         self.subscription  # prevent unused variable warning
+        
 
-        self.fac = Hdc2460(facSerialPort)
-        self.bac = Hdc2460(bacSerialPort)
+        facSerialPort = self.get_parameter('facSerialPort')
+        bacSerialPort = self.get_parameter('bacSerialPort')
+        bitRate = self.get_parameter('serialBitRate')
+        maxSpeed = self.get_parameter('maxSpeed')
+
+        self.fac = Hdc2460(facSerialPort,bitRate,maxSpeed)
+        self.bac = Hdc2460(bacSerialPort,bitRate,maxSpeed)
 
         if self.fac.isConnected and self.bac.isConnected:
             self.get_logger().info("HDC2460s initialized.")

@@ -1,0 +1,6 @@
+hdc2460:
+  ros__parameters:
+    facSerialPort: "/dev/ttyACM0"
+    bacSerialPort: "/dev/ttyACM1"
+    serialBitRate: 115200
+    maxSpeed: 3
