@@ -3,9 +3,9 @@
 <package format="3">
   <name>control_pkg</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Robot control</description>
   <maintainer email="brandon@todo.todo">brandon</maintainer>
-  <license>TODO: License declaration</license>
+  <license>MIT</license>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
