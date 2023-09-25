@@ -25,7 +25,6 @@ class JoyConv(Node):
         self.speed_publisher = self.create_publisher(Float64, '/drive/speed', 10)
         self.pitch_publisher = self.create_publisher(Float64, '/plow/pitch', 10)
         self.yaw_publisher = self.create_publisher(Float64, '/plow/yaw', 10)
-        self.roll_publisher = self.create_publisher(Float64, '/plow/roll', 10)
 
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
 
@@ -34,7 +33,6 @@ class JoyConv(Node):
         self.speed_publisher.publish(self.calculate_speed(joy_msg))
         self.pitch_publisher.publish(self.calculate_pitch(joy_msg))
         self.yaw_publisher.publish(self.calculate_yaw(joy_msg))
-        self.roll_publisher.publish(self.calculate_roll(joy_msg))
 
     def calculate_turn(self, joy_msg):
         msg = Float64()
@@ -54,11 +52,6 @@ class JoyConv(Node):
     def calculate_yaw(self, joy_msg):
         msg = Float64()
         msg.data = joy_msg.axes[XBOX_DPAD_LEFTRIGHT]
-        return msg
-
-    def calculate_roll(self, joy_msg):
-        msg = Float64()
-        msg.data = deadband(joy_msg.axes[XBOX_RIGHT_TRIGGER] - joy_msg.axes[XBOX_LEFT_TRIGGER], 0.005) # Deadband set to .5% may not be needed, but probably safer
         return msg
 
 def main():
