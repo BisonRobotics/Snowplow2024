@@ -3,4 +3,8 @@ hdc2460:
     facSerialPort: "/dev/ttyACM0"
     bacSerialPort: "/dev/ttyACM1"
     serialBitRate: 115200
-    maxSpeed: 3
+    maxSpeed: 500
+    leftChannel: 1 
+    rightChannel: 2
+    accelRate: 500
+    brakeRate: 500
