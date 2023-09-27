@@ -1,6 +1,7 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
+from numpy import float32
 
 # XBOX Axis
 XBOX_LEFT_TRIGGER = 5
@@ -36,12 +37,12 @@ class JoyConv(Node):
 
     def calculate_turn(self, joy_msg):
         msg = Float32()
-        msg.data = float(msg.buttons[XBOX_RIGHT_PALM] - msg.buttons[XBOX_LEFT_PALM])
+        msg.data = float32(msg.buttons[XBOX_RIGHT_PALM] - msg.buttons[XBOX_LEFT_PALM])
         return msg
 
     def calculate_speed(self, joy_msg):
         msg = Float32()
-        msg.data = -deadband(joy_msg.axes[XBOX_RIGHT_Y], 0.005) # Deadband set to .5% may not be needed, but probably safer
+        msg.data = -deadband(joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y]), 0.005) # Deadband set to .5% may not be needed, but probably safer
         return msg
 
     def calculate_pitch(self, joy_msg):
