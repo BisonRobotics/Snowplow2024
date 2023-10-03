@@ -10,8 +10,8 @@ cap = cv2.VideoCapture('rtsp://admin:password@192.168.1.131:80/cam/realmonitor?c
 detector = apriltag.Detector()
 
 class ApriltagPublisher(Node):
-	def __init__(self):
-		super().__init__('apriltag_publisher')
+    def __init__(self):
+        super().__init__('apriltag_publisher')
         self.publisher_ = self.create_publisher(Float64MultiArray, '/apriltag', 10)
         timer_period = 0.5
         self.timer = self.create_timer(timer_period, self.timer_callback)
@@ -21,7 +21,7 @@ class ApriltagPublisher(Node):
         success, frame = cap.read()
         if success:
             gray = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
-            detection = detector.detect(gray)
+            detections = detector.detect(gray)
             result = []
             result.append(float(detections[0].tag_id))
             for x in detections[0].center:
