@@ -1,7 +1,7 @@
 import rclpy
 from rclpy.node import Node
 
-from std_msgs.ms import Float64MultiArray
+from std_msgs.msg import Float64MultiArray
 
 import cv2
 import apriltag
