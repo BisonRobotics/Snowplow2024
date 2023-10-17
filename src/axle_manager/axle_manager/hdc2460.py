@@ -18,10 +18,27 @@ class Hdc2460():
 
     def move(self, left_speed:float32, right_speed:float32):
         """Tells both motors to move at set speed. Assumes speed input from -1 to 1."""
+        left_speed = Tools.clamp(left_speed,-1,1)
+        right_speed = Tools.clamp(right_speed,-1,1)
+        
         self.setMotor(self.leftChannel,left_speed)
         self.setMotor(self.rightChannel,right_speed)
 
+    def actuate(self, val:int, extendCh:int, retractCh:int):
+        """Controls an actuator using 2 digital output channels"""
+        val = Tools.clamp(val, -1, 1)
+        if val > 0:
+            self.setDigitalOut(extendCh,1)
+            self.setDigitalOut(retractCh,0)
+        elif val < 0:
+            self.setDigitalOut(extendCh,0)
+            self.setDigitalOut(retractCh,1)
+        else:
+            self.setDigitalOut(extendCh,0)
+            self.setDigitalOut(retractCh,0)
+
     def configure(self, maxSpeed:int,accelRate:int, brakeRate:int):
+        """Configures the HDC2460"""
         self.setAccelration(accelRate)
         self.setDeccelration(brakeRate)
         self.maxSpeed = maxSpeed
@@ -59,10 +76,11 @@ class Hdc2460():
 
     def setDigitalOut(self,bit:int,val:int):
         """"Will set digital output selected by the bit number."""
-        if val==0:
-            self.sendCommand("!D0 {bit}")  
-        else:
+        val = Tools.clamp(val, 0, 1)
+        if val==1:
             self.sendCommand("!D1 {bit}")  
+        else:
+            self.sendCommand("!D0 {bit}")  
 
     def setDeccelration(self, rate:int):
         """Set the rate of speed change during decceleration for a motor channel."""
