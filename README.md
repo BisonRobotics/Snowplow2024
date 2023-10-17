@@ -49,4 +49,5 @@ access point: `192.168.1.10`
 Computer: `192.168.1.1`
 
 ### Super Secret Info
-Riley can't tell me what to do. Which is why I am in charge of the code and got him to buy me all the fancy stuff.
+Riley can't tell me what to do. Which is why I am in charge of the code and got him to buy me all the fancy stuff. -Nate
+I did all the research and all the fancy stuff was my idea - Riley
