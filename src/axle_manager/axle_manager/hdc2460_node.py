@@ -8,20 +8,27 @@ from axle_manager.hdc2460 import Hdc2460
 class Hdc2460Node(Node):
     def __init__(self):
         super().__init__("hdc2460")
-        self.declare_parameters(
+        self.set_parameters_atomically(self.declare_parameters(
+            namespace='',
             parameters=[
-                ('facSerialPort',rclpy.Parameter.Type.STRING),
-                ('bacSerialPort',rclpy.Parameter.Type.STRING),
-                ('serialBitRate',rclpy.Parameter.Type.INTEGER),
-                ('leftChannel',1,rclpy.Parameter.Type.INTEGER),
-                ('rightChannel',2,rclpy.Parameter.Type.INTEGER),
-                ('maxSpeed',1000,rclpy.Parameter.Type.INTEGER),
-                ('accelRate',500,rclpy.Parameter.Type.INTEGER),
-                ('brakeRate',500,rclpy.Parameter.Type.INTEGER),
-                ('pivotDevice',rclpy.Parameter.Type.STRING),
-                ('plowDevice',rclpy.Parameter.Type.STRING)
+                ('facSerialPort',"/dev/ttyACM0"),
+                ('bacSerialPort',"/dev/ttyACM1"),
+                ('serialBitRate',115200),
+                ('leftChannel',1),
+                ('rightChannel',2),
+                ('maxSpeed',500),
+                ('accelRate',5000),
+                ('brakeRate',5000),
+                ('pivotDevice',""),
+                ('pivotExtendChannel',0),
+                ('pivotRetractChannel',0),
+                ('plowDevice',""),
+                ('plowLeftChannel',0),
+                ('plowRightChannel',0),
+                ('plowUpChannel',0),
+                ('plowDownChannel',0)
             ]
-        )
+        ))
         #Start subscriptions
         self.speedSubscription = self.create_subscription(Twist, '/cmd_vel', self.speed, 10)
         self.speedSubscription  # prevent unused variable warning
@@ -31,25 +38,25 @@ class Hdc2460Node(Node):
         self.plowSubscription  # prevent unused variable warning
         
         #Get all parameters
-        facSerialPort = str(self.get_parameter('facSerialPort'))
-        bacSerialPort = str(self.get_parameter('bacSerialPort'))
-        bitRate = int(self.get_parameter('serialBitRate'))
-        leftChannel = int(self.get_parameter('leftChannel'))
-        rightChannel = int(self.get_parameter('rightChannel'))
-        maxSpeed = int(self.get_parameter('maxSpeed'))
-        accelRate = int(self.get_parameter('accelRate'))
-        brakeRate = int(self.get_parameter('brakeRate'))
-        self.pivotDevice = str(self.get_parameter('pivotDevice'))
-        self.pivotLeft = int(self.get_parameter('pivotExtendChannel'))
-        self.pivotRight = int(self.get_parameter('pivotRetractChannel'))
-        self.plowDevice = str(self.get_parameter('plowDevice'))
-        self.plowLeft = int(self.get_parameter('plowLeftChannel'))
-        self.plowRight = int(self.get_parameter('plowRightChannel'))
-        self.plowUp = int(self.get_parameter('plowUpChannel'))
-        self.plowDown = int(self.get_parameter('plowDownChannel'))
+        facSerialPort = str(self.get_parameter('facSerialPort').value)
+        bacSerialPort = str(self.get_parameter('bacSerialPort').value)
+        bitRate = int(self.get_parameter('serialBitRate').value)
+        leftChannel = int(self.get_parameter('leftChannel').value)
+        rightChannel = int(self.get_parameter('rightChannel').value)
+        maxSpeed = int(self.get_parameter('maxSpeed').value)
+        accelRate = int(self.get_parameter('accelRate').value)
+        brakeRate = int(self.get_parameter('brakeRate').value)
+        self.pivotDevice = str(self.get_parameter('pivotDevice').value)
+        self.pivotLeft = int(self.get_parameter('pivotExtendChannel').value)
+        self.pivotRight = int(self.get_parameter('pivotRetractChannel').value)
+        self.plowDevice = str(self.get_parameter('plowDevice').value)
+        self.plowLeft = int(self.get_parameter('plowLeftChannel').value)
+        self.plowRight = int(self.get_parameter('plowRightChannel').value)
+        self.plowUp = int(self.get_parameter('plowUpChannel').value)
+        self.plowDown = int(self.get_parameter('plowDownChannel').value)
 
-        self.fac = Hdc2460(facSerialPort,bitRate,maxSpeed,leftChannel,rightChannel)
-        self.bac = Hdc2460(bacSerialPort,bitRate,maxSpeed,leftChannel,rightChannel)
+        self.fac = Hdc2460(facSerialPort,bitRate,leftChannel,rightChannel)
+        self.bac = Hdc2460(bacSerialPort,bitRate,leftChannel,rightChannel)
 
         if self.fac.isConnected and self.bac.isConnected:
             self.get_logger().info("HDC2460s connected.")

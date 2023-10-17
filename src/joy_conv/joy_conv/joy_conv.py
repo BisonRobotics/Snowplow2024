@@ -1,7 +1,11 @@
 import rclpy
 from rclpy.node import Node
 from std_msgs.msg import Float32
+from std_msgs.msg import Int8
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Joy
 from numpy import float32
+from utilities.tools import Tools
 
 # XBOX Axis
 XBOX_LEFT_TRIGGER = 5
@@ -14,52 +18,48 @@ XBOX_RIGHT_Y = 3
 XBOX_LEFT_PALM = 23
 XBOX_RIGHT_PALM = 19
 
-def deadband(value, size):
-    return value if abs(value) >= size else 0
+
 
 class JoyConv(Node):
     
     def __init__(self):
         super().__init__('joy_conv')
         
-        self.turn_publisher = self.create_publisher(Float32, '/drive/turn', 10)
-        self.speed_publisher = self.create_publisher(Float32, '/drive/speed', 10)
-        self.pitch_publisher = self.create_publisher(Float32, '/plow/pitch', 10)
-        self.yaw_publisher = self.create_publisher(Float32, '/plow/yaw', 10)
+        self.speed_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
+        self.pivot_publisher = self.create_publisher(Int8, '/vehicle/pivot', 10)
+        self.plow_publisher = self.create_publisher(Twist, '/vehicle/plow', 10)
 
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
 
-    def joy_callback(self, joy_msg):
-        self.turn_publisher.publish(self.calculate_turn(joy_msg))
-        self.speed_publisher.publish(self.calculate_speed(joy_msg))
-        self.pitch_publisher.publish(self.calculate_pitch(joy_msg))
-        self.yaw_publisher.publish(self.calculate_yaw(joy_msg))
+    def joy_callback(self, msg:Joy):
+        self.pivot_publisher.publish(self.calculate_pivot(msg))
+        self.speed_publisher.publish(self.calculate_speed(msg))
+        self.plow_publisher.publish(self.calculate_plow(msg))
 
-    def calculate_turn(self, joy_msg):
-        msg = Float32()
-        msg.data = float32(msg.buttons[XBOX_RIGHT_PALM] - msg.buttons[XBOX_LEFT_PALM])
+    def calculate_pivot(self, joy_msg:Joy) -> Int8:
+        msg = Int8()
+        msg.data = int(joy_msg.buttons[XBOX_RIGHT_PALM] - joy_msg.buttons[XBOX_LEFT_PALM])
         return msg
 
-    def calculate_speed(self, joy_msg):
-        msg = Float32()
-        msg.data = -deadband(joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y]), 0.005) # Deadband set to .5% may not be needed, but probably safer
+    def calculate_speed(self, joy_msg:Joy) -> Twist:
+        msg = Twist()
+        msg.linear.x = -Tools.deadband(joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y]), 0.005) # Deadband set to .5% may not be needed, but probably safer
         return msg
 
-    def calculate_pitch(self, joy_msg):
-        msg = Float32()
-        msg.data = joy_msg.axes[XBOX_DPAD_UPDOWN]
-        return msg
-
-    def calculate_yaw(self, joy_msg):
-        msg = Float32()
-        msg.data = joy_msg.axes[XBOX_DPAD_LEFTRIGHT]
+    def calculate_plow(self, joy_msg:Joy) -> Twist:
+        msg = Twist()
+        msg.angular.x = joy_msg.axes[XBOX_DPAD_LEFTRIGHT]
+        msg.angular.y = joy_msg.axes[XBOX_DPAD_UPDOWN]
         return msg
 
 def main():
     rclpy.init()
-    joy_conv = JoyConv()
-    rclpy.spin(joy_conv)
-    joy_conv.destroy_node()
+
+    node = JoyConv()
+    rclpy.spin(node)
+    
+    # Destroy the node explicitly
+    node.destroy_node()
     rclpy.shutdown()
 
 if __name__ == '__main__':

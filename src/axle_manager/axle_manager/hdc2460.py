@@ -1,6 +1,6 @@
 import serial
 from numpy import float32
-from utilities.utilities.tools import Tools
+from utilities.tools import Tools
 
 class Hdc2460():
 

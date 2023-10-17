@@ -11,7 +11,7 @@ setup(
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools','serial'],
     zip_safe=True,
     maintainer='nate',
     maintainer_email='20501643+naterbots@users.noreply.github.com',
@@ -20,7 +20,7 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
-             'hdc2460 = axle_manager.hdc2460_node:main'
+             'axle_manager = axle_manager.hdc2460_node:main'
         ],
     },
 )
