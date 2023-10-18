@@ -12,7 +12,7 @@
   <depend>std_msgs</depend>
   <depend>io_context</depend>
   <depend>utilities</depend>
-  <depend>serial</depend>
+  <depend>python3-serial</depend>
 
   <test_depend>ament_copyright</test_depend>
   <test_depend>ament_flake8</test_depend>
