@@ -11,22 +11,22 @@ class Hdc2460Node(Node):
         self.set_parameters_atomically(self.declare_parameters(
             namespace='',
             parameters=[
-                ('facSerialPort',"/dev/ttyACM0"),
-                ('bacSerialPort',"/dev/ttyACM1"),
+                ('facSerialPort',"/dev/ttyS1"),
+                ('bacSerialPort',"/dev/ttyS0"),
                 ('serialBitRate',115200),
                 ('leftChannel',1),
                 ('rightChannel',2),
                 ('maxSpeed',500),
                 ('accelRate',5000),
                 ('brakeRate',5000),
-                ('pivotDevice',""),
-                ('pivotExtendChannel',0),
-                ('pivotRetractChannel',0),
-                ('plowDevice',""),
-                ('plowLeftChannel',0),
-                ('plowRightChannel',0),
-                ('plowUpChannel',0),
-                ('plowDownChannel',0)
+                ('pivotDevice',"FAC"),
+                ('pivotExtendChannel',1),
+                ('pivotRetractChannel',2),
+                ('plowDevice',"FAC"),
+                ('plowLeftChannel',3),
+                ('plowRightChannel',4),
+                ('plowUpChannel',5),
+                ('plowDownChannel',6)
             ]
         ))
         #Start subscriptions

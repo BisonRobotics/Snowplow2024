@@ -47,7 +47,7 @@ class Hdc2460():
 #region Roboteq Driver
     def sendCommand(self, cmd):
         """Sends the serial data to both the HDC2460"""
-        self.port.write(cmd + "\r")
+        self.port.write((cmd + "\r").encode())
 
     def setMotor(self,ch:int,speed:float32):
         """Tells the HDC2460 to move at set speed"""
@@ -59,11 +59,11 @@ class Hdc2460():
         #Roboteq speed input is from -1000 to 1000. Just in case max speed > 1000.
         speed = Tools.clamp(speed, -1000, 1000)
         #send command to 
-        self.sendCommand("!G {ch} {speed}")
+        self.sendCommand(f"!G {ch} {speed}")
 
     def stopMotor(self, ch:int):
         """Stops the motor for the specified channel."""
-        self.sendCommand("!MS {ch}")
+        self.sendCommand(f"!MS {ch}")
 
     def stopAllMotors(self):
         """Stops both motors on the controller."""
@@ -72,27 +72,25 @@ class Hdc2460():
 
     def resetDigitalOut(self):
         """"Will turn off all digital outputs."""
-        self.sendCommand("!DS 0")  
+        self.sendCommand(f"!DS 0")  
 
     def setDigitalOut(self,bit:int,val:int):
         """"Will set digital output selected by the bit number."""
         val = Tools.clamp(val, 0, 1)
-        if val==1:
-            self.sendCommand("!D1 {bit}")  
-        else:
-            self.sendCommand("!D0 {bit}")  
+        val = 1 if val == 1 else 0
+        self.sendCommand(f"!D{val} {bit}")
 
     def setDeccelration(self, rate:int):
         """Set the rate of speed change during decceleration for a motor channel."""
         rate = Tools.clamp(rate, 0, 500000)
-        self.sendCommand("!DC {self.leftChannel} {rate}")  
-        self.sendCommand("!DC {self.rightChannel} {rate}")  
+        self.sendCommand(f"!DC {self.leftChannel} {rate}")  
+        self.sendCommand(f"!DC {self.rightChannel} {rate}")  
 
     def setAccelration(self, rate:int):
         """Set the rate of speed change during acceleration for a motor channel."""
         rate = Tools.clamp(rate, 0, 500000)
-        self.sendCommand("!AC {self.leftChannel} {rate}")  
-        self.sendCommand("!AC {self.rightChannel} {rate}")  
+        self.sendCommand(f"!AC {self.leftChannel} {rate}")  
+        self.sendCommand(f"!AC {self.rightChannel} {rate}")  
 
 
 

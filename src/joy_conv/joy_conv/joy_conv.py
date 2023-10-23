@@ -43,7 +43,7 @@ class JoyConv(Node):
 
     def calculate_speed(self, joy_msg:Joy) -> Twist:
         msg = Twist()
-        msg.linear.x = -Tools.deadband(joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y]), 0.005) # Deadband set to .5% may not be needed, but probably safer
+        msg.linear.x = joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y])
         return msg
 
     def calculate_plow(self, joy_msg:Joy) -> Twist:
