@@ -3,6 +3,8 @@ from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
 from std_msgs.msg import Int8
+from std_msgs.msg import Int32
+from std_msgs.msg import Float32
 from axle_manager.hdc2460 import Hdc2460
 
 class Hdc2460Node(Node):
@@ -22,6 +24,7 @@ class Hdc2460Node(Node):
                 ('pivotDevice',"FAC"),
                 ('pivotExtendChannel',1),
                 ('pivotRetractChannel',2),
+                ('pivotSensorChannel',1),
                 ('plowDevice',"FAC"),
                 ('plowLeftChannel',3),
                 ('plowRightChannel',4),
@@ -36,6 +39,11 @@ class Hdc2460Node(Node):
         self.pivotSubscription  # prevent unused variable warning
         self.plowSubscription = self.create_subscription(Twist, '/vehicle/plow', self.plow, 10)
         self.plowSubscription  # prevent unused variable warning
+        self.pivotpublisher = self.create_publisher(Float32, '/sensor/pivot', 10)
+        self.flEnc = self.create_publisher(Int32, '/sensor/wheel/frontleft', 10)
+        self.frEnc = self.create_publisher(Int32, '/sensor/wheel/frontright', 10)
+        self.rlEnc = self.create_publisher(Int32, '/sensor/wheel/rearleft', 10)
+        self.rrEnc = self.create_publisher(Int32, '/sensor/wheel/rearright', 10)
         
         #Get all parameters
         facSerialPort = str(self.get_parameter('facSerialPort').value)
@@ -54,6 +62,7 @@ class Hdc2460Node(Node):
         self.plowRight = int(self.get_parameter('plowRightChannel').value)
         self.plowUp = int(self.get_parameter('plowUpChannel').value)
         self.plowDown = int(self.get_parameter('plowDownChannel').value)
+        self.pivotSensor = int(self.get_parameter('pivotSensorChannel').value)
 
         self.fac = Hdc2460(facSerialPort,bitRate,leftChannel,rightChannel)
         self.bac = Hdc2460(bacSerialPort,bitRate,leftChannel,rightChannel)
@@ -70,6 +79,8 @@ class Hdc2460Node(Node):
             #shutdown since we couldn't startup ports
             self.destroy_node()
             rclpy.shutdown()
+        
+        self.timer = self.create_timer(0.1,self.sensorsPub)
 
 
     def speed(self, msg:Twist):
@@ -79,7 +90,7 @@ class Hdc2460Node(Node):
         # Send linear and angular velocities to serial
         self.fac.move(left_speed,right_speed)
         self.bac.move(left_speed,right_speed)
-        self.get_logger().debug("Roboteq: Left={} Right={}".format(left_speed,right_speed))
+        self.get_logger().debug("Roboteq: Left={0:.2f} Right={0:.2f}".format(left_speed,right_speed))
 
     def pivot(self, msg:Int8):
         cmd = int(msg.data)
@@ -108,10 +119,32 @@ class Hdc2460Node(Node):
             self.bac.actuate(cmd.y,chU,chD)
         else:
             self.get_logger().warning("No plow device configured.")
-        self.get_logger().debug("Roboteq: Val={} Ch1={} Ch2={}".format(cmd.x,chR,chL))
-        self.get_logger().debug("Roboteq: Val={} Ch1={} Ch2={}".format(cmd.y,chU,chD))
+        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={} Ch2={}".format(cmd.x,chR,chL))
+        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={} Ch2={}".format(cmd.y,chU,chD))
         
+    def sensorsPub(self):
+        pivot = Float32
+        if self.pivotDevice.casefold() == "FAC".casefold():
+            pivot.data = self.fac.readAnalogInput(self.pivotSensor)
+        elif self.pivotDevice.casefold() == "BAC".casefold():
+            pivot.data = self.bac.readAnalogInput(self.pivotSensor)
+        else:
+            self.get_logger().warning("No pivot device configured.")
+        self.get_logger().debug("Roboteq: AI={0:.2f} Ch={}".format(pivot.data,self.pivotSensor))
+        self.pivotpublisher.publish(pivot)
 
+        fl = Int32
+        fr = Int32
+        rl = Int32
+        rr = Int32
+        fl.data , fr.data = self.fac.readRPMs()
+        self.get_logger().debug("Front RPM: Left={0:.2f} Right={0:.2f}".format(fl.data,fr.data))
+        rl.data , rr.data = self.bac.readRPMs()
+        self.get_logger().debug("Rear RPM: Left={0:.2f} Right={0:.2f}".format(rl.data,rr.data))
+        self.flEnc.publish(fl)
+        self.frEnc.publish(fr)
+        self.rlEnc.publish(rl)
+        self.rrEnc.publish(rr)
 
     def destroy_node(self):
         super().destroy_node()

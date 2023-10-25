@@ -92,6 +92,21 @@ class Hdc2460():
         self.sendCommand(f"!AC {self.leftChannel} {rate}")  
         self.sendCommand(f"!AC {self.rightChannel} {rate}")  
 
-
-
+    def readAnalogInput(self,channel:int)->float:
+        """Reads the raw analog value"""
+        self.sendCommand(f"?AI {channel}") 
+        bytes = self.port.readline
+        return int.from_bytes(bytes)/1000
+    
+    def readRPM(self,channel:int)->int:
+        """Reports the actual speed measured by the encoders as the actual RPM value. To report RPM accurately, the correct Pulses per Revolution (PPR) must be stored in the encoder configuration """
+        self.sendCommand(f"?S {channel}")
+        bytes = self.port.readline
+        return int.from_bytes(bytes)
+    
+    def readRPMs(self):
+        left = self.readRPM(self.leftChannel)
+        right = self.readRPM(self.rightChannel)
+        return left,right
+        
 #endregion
