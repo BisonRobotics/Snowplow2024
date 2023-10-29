@@ -13,3 +13,9 @@ class Tools():
         
     def deadband(value:float, size:float)->float:
         return value if abs(value) >= size else 0
+
+    def potentiometer_to_degrees(pot_value: float)->float:
+        return -0.084482109 * pot_value + 82.33745763
+
+    def degrees_to_potentiometer(degree_value: float)->float:
+        return round((degree_value - 82.33745763) / -0.084482109, 0)

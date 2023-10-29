@@ -25,11 +25,17 @@ class JoyConv(Node):
     def __init__(self):
         super().__init__('joy_conv')
         
+        self.pivot_angle = 0
+
         self.speed_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pivot_publisher = self.create_publisher(Int8, '/vehicle/pivot', 10)
         self.plow_publisher = self.create_publisher(Twist, '/vehicle/plow', 10)
 
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
+        self.pivot_sub = self.create_subscription(Float32, '/sensor/pivot', self.set_pivot_angle, 10)
+
+    def set_pivot_angle(self, msg: Float32):
+        self.pivot_angle = Tools.potentiometer_to_degrees(msg.data) 
 
     def joy_callback(self, msg:Joy):
         self.pivot_publisher.publish(self.calculate_pivot(msg))
@@ -44,6 +50,8 @@ class JoyConv(Node):
     def calculate_speed(self, joy_msg:Joy) -> Twist:
         msg = Twist()
         msg.linear.x = joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y])
+        percentage = 0.0099 * self.pivot_angle + 0.9996
+        msg.angular.z = (msg.linear.x * percentage) - msg.linear.x
         return msg
 
     def calculate_plow(self, joy_msg:Joy) -> Twist:

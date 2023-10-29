@@ -1,4 +1,6 @@
 import serial
+import re
+from time import sleep
 from numpy import float32
 from utilities.tools import Tools
 
@@ -18,8 +20,8 @@ class Hdc2460():
 
     def move(self, left_speed:float32, right_speed:float32):
         """Tells both motors to move at set speed. Assumes speed input from -1 to 1."""
-        left_speed = Tools.clamp(left_speed,-1,1)
-        right_speed = Tools.clamp(right_speed,-1,1)
+        left_speed = Tools.clamp(left_speed,-2,2)
+        right_speed = Tools.clamp(right_speed,-2,2)
         
         self.setMotor(self.leftChannel,left_speed)
         self.setMotor(self.rightChannel,right_speed)
@@ -51,14 +53,13 @@ class Hdc2460():
 
     def setMotor(self,ch:int,speed:float32):
         """Tells the HDC2460 to move at set speed"""
-        speed = round(speed*1000)
-
+        speed = round(speed*500)
         #clamp speed, format, and send it of to the roboteq
-        speed = Tools.clamp(speed, -self.maxSpeed, self.maxSpeed)
+        #speed = Tools.clamp(speed, -self.maxSpeed, self.maxSpeed)
 
         #Roboteq speed input is from -1000 to 1000. Just in case max speed > 1000.
         speed = Tools.clamp(speed, -1000, 1000)
-        #send command to 
+        #send command to
         self.sendCommand(f"!G {ch} {speed}")
 
     def stopMotor(self, ch:int):
@@ -94,15 +95,20 @@ class Hdc2460():
 
     def readAnalogInput(self,channel:int)->float:
         """Reads the raw analog value"""
-        self.sendCommand(f"?AI {channel}") 
-        bytes = self.port.readline
-        return int.from_bytes(bytes)/1000
+        self.port.reset_input_buffer()
+        self.sendCommand(f"?AI {channel}")
+        line = str(self.port.read_until(r'AI=-?\d+'))[2:-1]
+        result = float(re.search(r'AI=-?\d+', line).group()[3:])
+        return result
     
     def readRPM(self,channel:int)->int:
         """Reports the actual speed measured by the encoders as the actual RPM value. To report RPM accurately, the correct Pulses per Revolution (PPR) must be stored in the encoder configuration """
-        self.sendCommand(f"?S {channel}")
-        bytes = self.port.readline
-        return int.from_bytes(bytes)
+        self.port.reset_input_buffer()
+        self.sendCommand("?S {channel}")
+        line = str(self.port.read_until(r'S=-?\d+'))[2:-1]
+        result = int(re.search(r'S=-?\d+', line).group()[2:])
+        return result
+        #return int.from_bytes(bs, byteorder='little')
     
     def readRPMs(self):
         left = self.readRPM(self.leftChannel)

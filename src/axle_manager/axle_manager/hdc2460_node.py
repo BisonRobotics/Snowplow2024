@@ -1,4 +1,5 @@
 import rclpy
+import threading
 from rclpy.node import Node
 from geometry_msgs.msg import Twist
 from geometry_msgs.msg import Vector3
@@ -19,8 +20,8 @@ class Hdc2460Node(Node):
                 ('leftChannel',1),
                 ('rightChannel',2),
                 ('maxSpeed',500),
-                ('accelRate',5000),
-                ('brakeRate',5000),
+                ('accelRate',50000),
+                ('brakeRate',10000),
                 ('pivotDevice',"FAC"),
                 ('pivotExtendChannel',1),
                 ('pivotRetractChannel',2),
@@ -40,10 +41,10 @@ class Hdc2460Node(Node):
         self.plowSubscription = self.create_subscription(Twist, '/vehicle/plow', self.plow, 10)
         self.plowSubscription  # prevent unused variable warning
         self.pivotpublisher = self.create_publisher(Float32, '/sensor/pivot', 10)
-        self.flEnc = self.create_publisher(Int32, '/sensor/wheel/frontleft', 10)
-        self.frEnc = self.create_publisher(Int32, '/sensor/wheel/frontright', 10)
-        self.rlEnc = self.create_publisher(Int32, '/sensor/wheel/rearleft', 10)
-        self.rrEnc = self.create_publisher(Int32, '/sensor/wheel/rearright', 10)
+        #self.flEnc = self.create_publisher(Int32, '/sensor/wheel/frontleft', 10)
+        #self.frEnc = self.create_publisher(Int32, '/sensor/wheel/frontright', 10)
+        #self.rlEnc = self.create_publisher(Int32, '/sensor/wheel/rearleft', 10)
+        #self.rrEnc = self.create_publisher(Int32, '/sensor/wheel/rearright', 10)
         
         #Get all parameters
         facSerialPort = str(self.get_parameter('facSerialPort').value)
@@ -79,14 +80,13 @@ class Hdc2460Node(Node):
             #shutdown since we couldn't startup ports
             self.destroy_node()
             rclpy.shutdown()
-        
+       
+        self.reading_from_sensors = False
         self.timer = self.create_timer(0.1,self.sensorsPub)
 
-
     def speed(self, msg:Twist):
-        left_speed = (msg.linear.x - msg.angular.z)
-        right_speed = (msg.linear.x + msg.angular.z)
-
+        left_speed = (msg.linear.x + msg.angular.z)
+        right_speed = (msg.linear.x - msg.angular.z)
         # Send linear and angular velocities to serial
         self.fac.move(left_speed,right_speed)
         self.bac.move(left_speed,right_speed)
@@ -106,7 +106,10 @@ class Hdc2460Node(Node):
         
 
     def plow(self, msg:Twist):
-        cmd = Vector3(msg.angular)
+        cmd = Vector3()
+        cmd.x = msg.angular.x
+        cmd.y = msg.angular.y
+        cmd.z = msg.angular.z
         chL = int(self.plowLeft)
         chR = int(self.plowRight)
         chU = int(self.plowLeft)
@@ -119,32 +122,27 @@ class Hdc2460Node(Node):
             self.bac.actuate(cmd.y,chU,chD)
         else:
             self.get_logger().warning("No plow device configured.")
-        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={} Ch2={}".format(cmd.x,chR,chL))
-        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={} Ch2={}".format(cmd.y,chU,chD))
-        
-    def sensorsPub(self):
-        pivot = Float32
+        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={0} Ch2={0}".format(cmd.x,chR,chL))
+        self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={0} Ch2={0}".format(cmd.y,chU,chD))
+
+    def sensorsPubStuff(self):
+        self.reading_from_sensors = True
+        pivot = Float32()
         if self.pivotDevice.casefold() == "FAC".casefold():
             pivot.data = self.fac.readAnalogInput(self.pivotSensor)
         elif self.pivotDevice.casefold() == "BAC".casefold():
             pivot.data = self.bac.readAnalogInput(self.pivotSensor)
         else:
             self.get_logger().warning("No pivot device configured.")
-        self.get_logger().debug("Roboteq: AI={0:.2f} Ch={}".format(pivot.data,self.pivotSensor))
+        self.get_logger().debug("Roboteq: AI={0:.2f} Ch={1}".format(pivot.data,self.pivotSensor))
         self.pivotpublisher.publish(pivot)
+        self.get_logger().info(f'updated potentiometer value: {pivot.data}')
+        self.reading_from_sensors = False
 
-        fl = Int32
-        fr = Int32
-        rl = Int32
-        rr = Int32
-        fl.data , fr.data = self.fac.readRPMs()
-        self.get_logger().debug("Front RPM: Left={0:.2f} Right={0:.2f}".format(fl.data,fr.data))
-        rl.data , rr.data = self.bac.readRPMs()
-        self.get_logger().debug("Rear RPM: Left={0:.2f} Right={0:.2f}".format(rl.data,rr.data))
-        self.flEnc.publish(fl)
-        self.frEnc.publish(fr)
-        self.rlEnc.publish(rl)
-        self.rrEnc.publish(rr)
+    def sensorsPub(self):
+        if not self.reading_from_sensors:
+            t = threading.Thread(target=self.sensorsPubStuff)
+            t.start()
 
     def destroy_node(self):
         super().destroy_node()
