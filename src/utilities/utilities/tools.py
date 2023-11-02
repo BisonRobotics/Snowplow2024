@@ -15,7 +15,7 @@ class Tools():
         return value if abs(value) >= size else 0
 
     def potentiometer_to_degrees(pot_value: float)->float:
-        return -0.084482109 * pot_value + 82.33745763
+        return -0.086478327 * pot_value + 86.96753949
 
     def degrees_to_potentiometer(degree_value: float)->float:
-        return round((degree_value - 82.33745763) / -0.084482109, 0)
+        return round((degree_value - 86.96753949) / -0.086478327, 0)

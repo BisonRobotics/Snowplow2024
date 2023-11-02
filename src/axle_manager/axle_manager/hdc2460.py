@@ -1,5 +1,6 @@
 import serial
 import re
+import threading
 from time import sleep
 from numpy import float32
 from utilities.tools import Tools
@@ -97,7 +98,9 @@ class Hdc2460():
         """Reads the raw analog value"""
         self.port.reset_input_buffer()
         self.sendCommand(f"?AI {channel}")
-        line = str(self.port.read_until(r'AI=-?\d+'))[2:-1]
+        line = ''
+        while (not re.search(r'AI=-?\d+\D', line)):
+            line += str(self.port.read(self.port.in_waiting))[2:-1]
         result = float(re.search(r'AI=-?\d+', line).group()[3:])
         return result
     
@@ -105,14 +108,14 @@ class Hdc2460():
         """Reports the actual speed measured by the encoders as the actual RPM value. To report RPM accurately, the correct Pulses per Revolution (PPR) must be stored in the encoder configuration """
         self.port.reset_input_buffer()
         self.sendCommand("?S {channel}")
-        line = str(self.port.read_until(r'S=-?\d+'))[2:-1]
+        line = ''
+        while (not re.search(r'AI=-?\d+\D', line)):
+            line += str(self.port.read(self.port.in_waiting))[2:-1]
         result = int(re.search(r'S=-?\d+', line).group()[2:])
         return result
-        #return int.from_bytes(bs, byteorder='little')
     
     def readRPMs(self):
         left = self.readRPM(self.leftChannel)
         right = self.readRPM(self.rightChannel)
         return left,right
-        
-#endregion
+        #endregion

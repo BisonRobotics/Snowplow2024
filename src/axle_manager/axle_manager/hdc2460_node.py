@@ -7,6 +7,7 @@ from std_msgs.msg import Int8
 from std_msgs.msg import Int32
 from std_msgs.msg import Float32
 from axle_manager.hdc2460 import Hdc2460
+from utilities.tools import Tools
 
 class Hdc2460Node(Node):
     def __init__(self):
@@ -20,7 +21,7 @@ class Hdc2460Node(Node):
                 ('leftChannel',1),
                 ('rightChannel',2),
                 ('maxSpeed',500),
-                ('accelRate',50000),
+                ('accelRate',30000),
                 ('brakeRate',10000),
                 ('pivotDevice',"FAC"),
                 ('pivotExtendChannel',1),
@@ -82,11 +83,17 @@ class Hdc2460Node(Node):
             rclpy.shutdown()
        
         self.reading_from_sensors = False
+        self.turn_angle = 0
         self.timer = self.create_timer(0.1,self.sensorsPub)
 
     def speed(self, msg:Twist):
-        left_speed = (msg.linear.x + msg.angular.z)
-        right_speed = (msg.linear.x - msg.angular.z)
+        speed = Tools.clamp(msg.linear.x, -1, 1)
+        
+        percentage = 0.01 * self.turn_angle + 1
+        offset = (speed * percentage) - speed
+        
+        left_speed = (speed + offset)
+        right_speed = (speed - offset)
         # Send linear and angular velocities to serial
         self.fac.move(left_speed,right_speed)
         self.bac.move(left_speed,right_speed)
@@ -125,7 +132,7 @@ class Hdc2460Node(Node):
         self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={0} Ch2={0}".format(cmd.x,chR,chL))
         self.get_logger().debug("Roboteq: Val={0:.4f} Ch1={0} Ch2={0}".format(cmd.y,chU,chD))
 
-    def sensorsPubStuff(self):
+    def publish_sensor_data(self):
         self.reading_from_sensors = True
         pivot = Float32()
         if self.pivotDevice.casefold() == "FAC".casefold():
@@ -136,12 +143,12 @@ class Hdc2460Node(Node):
             self.get_logger().warning("No pivot device configured.")
         self.get_logger().debug("Roboteq: AI={0:.2f} Ch={1}".format(pivot.data,self.pivotSensor))
         self.pivotpublisher.publish(pivot)
-        self.get_logger().info(f'updated potentiometer value: {pivot.data}')
+        self.turn_angle = Tools.potentiometer_to_degrees(pivot.data)
         self.reading_from_sensors = False
 
     def sensorsPub(self):
         if not self.reading_from_sensors:
-            t = threading.Thread(target=self.sensorsPubStuff)
+            t = threading.Thread(target=self.publish_sensor_data)
             t.start()
 
     def destroy_node(self):
