@@ -32,6 +32,10 @@ See: http://wiki.ros.org/Quality/Tutorials/UnitTesting
 
 ## Misc Info
 
+### Motor Controllers
+[Roboteq HDC2460](https://www.roboteq.com/products/products-brushed-dc-motor-controllers/hdc2450-259-detail) \
+[Roboteq User Manual](https://www.roboteq.com/docman-list/motor-controllers-documents-and-files/documentation/user-manual/272-roboteq-controllers-user-manual-v21/file) \
+
 ### Onboard computer login information
 
 name: \

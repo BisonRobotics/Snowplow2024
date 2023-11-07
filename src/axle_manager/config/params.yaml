@@ -1,0 +1,18 @@
+hdc2460:
+  ros__parameters:
+    facSerialPort: "/dev/ttyACM0"
+    bacSerialPort: "/dev/ttyACM1"
+    serialBitRate: 115200
+    maxSpeed: 1000
+    leftChannel: 1 
+    rightChannel: 2
+    accelRate: 5000
+    brakeRate: 5000
+    pivotDevice: "FAC"
+    pivotExtendChannel: 1
+    pivotRetractChannel: 2
+    plowDevice: "BAC"
+    plowLeftChannel: 1
+    plowRightChannel: 2
+    plowUpChannel: 3
+    plowDownChannel: 4
