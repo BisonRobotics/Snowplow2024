@@ -26,8 +26,7 @@ class JoyConv(Node):
         super().__init__('joy_conv')
         
         self.pivot_to_middle = False
-        self.middle = Tools.degrees_to_potentiometer(0)
-        self.current_pivot_pos = self.middle
+        self.current_pivot_pos = 0
         self.degree_deadband = 2.0
         
         self.speed_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
@@ -38,7 +37,7 @@ class JoyConv(Node):
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
 
     def update_pivot(self, msg: Float32):
-        self.current_pivot_pos = msg.data
+        self.current_pivot_pos = Tools.potentiometer_to_degres(msg.data)
 
     def joy_callback(self, msg:Joy):
         self.pivot_publisher.publish(self.calculate_pivot(msg))
@@ -58,14 +57,14 @@ class JoyConv(Node):
             if self.in_deadband():
                 msg.data = 0
             else:
-                msg.data = 1 if self.current_pivot_pos < self.middle else -1
+                msg.data = 1 if self.current_pivot_pos < 0 else -1
         else:
             msg.data = right - left
         return msg
     
     def in_deadband(self):
-        lower_deadband = self.middle - Tools.degrees_to_potentiometer(self.degree_deadband)
-        upper_deadband = self.middle + Tools.degrees_to_potentiometer(self.degree_deadband)
+        lower_deadband = -self.degree_deadband
+        upper_deadband = self.degree_deadband
         return self.current_pivot_pos >= lower_deadband and self.current_pivot_pos <= upper_deadband
 
     def calculate_speed(self, joy_msg:Joy) -> Twist:
