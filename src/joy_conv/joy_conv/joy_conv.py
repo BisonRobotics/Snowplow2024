@@ -17,7 +17,7 @@ XBOX_RIGHT_Y = 3
 # XBOX Buttons
 XBOX_LEFT_PALM = 23
 XBOX_RIGHT_PALM = 19
-XBOX_Y_BUTTON = 3
+XBOX_Y_BUTTON = 4
 
 
 class JoyConv(Node):
@@ -27,7 +27,7 @@ class JoyConv(Node):
         
         self.pivot_to_middle = False
         self.current_pivot_pos = 0
-        self.degree_deadband = 2.0
+        self.degree_deadband = 0.5
         
         self.speed_publisher = self.create_publisher(Twist, '/cmd_vel', 10)
         self.pivot_publisher = self.create_publisher(Int8, '/vehicle/pivot', 10)
@@ -56,6 +56,7 @@ class JoyConv(Node):
         if self.pivot_to_middle:
             if self.in_deadband():
                 msg.data = 0
+                self.pivot_to_middle = False
             else:
                 msg.data = 1 if self.current_pivot_pos < 0 else -1
         else:
@@ -69,11 +70,7 @@ class JoyConv(Node):
 
     def calculate_speed(self, joy_msg:Joy) -> Twist:
         msg = Twist()
-        left = joy_msg.axes[XBOX_LEFT_TRIGGER]
-        right = joy_msg.axes[XBOX_RIGHT_TRIGGER]
-        raw = right - left
-        msg.linear.x = raw ** 2
-        # msg.linear.x = joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y])
+        msg.linear.x = joy_msg.axes[XBOX_RIGHT_Y] * abs(joy_msg.axes[XBOX_RIGHT_Y])
         return msg
 
     def calculate_plow(self, joy_msg:Joy) -> Twist:
