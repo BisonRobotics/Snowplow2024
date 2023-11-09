@@ -37,7 +37,7 @@ class JoyConv(Node):
         self.joy_sub = self.create_subscription(Joy, 'joy', self.joy_callback, 10)
 
     def update_pivot(self, msg: Float32):
-        self.current_pivot_pos = Tools.potentiometer_to_degres(msg.data)
+        self.current_pivot_pos = Tools.potentiometer_to_degrees(msg.data)
 
     def joy_callback(self, msg:Joy):
         self.pivot_publisher.publish(self.calculate_pivot(msg))
