@@ -1,7 +1,7 @@
 from setuptools import find_packages, setup
 from glob import glob
 
-package_name = 'control_pkg'
+package_name = 'axle_manager'
 
 setup(
     name=package_name,
@@ -11,17 +11,18 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
-        ('share/'+package_name,glob('launch*launch.[pxy][yaml]*'))
+        ('share/'+package_name,glob('config/*params.[yaml]*'))
     ],
-    install_requires=['setuptools'],
+    install_requires=['setuptools','serial'],
     zip_safe=True,
-    maintainer='brandon',
-    maintainer_email='brandon@todo.todo',
-    description='TODO: Package description',
-    license='TODO: License declaration',
+    maintainer='nate',
+    maintainer_email='20501643+naterbots@users.noreply.github.com',
+    description='Driver for RoboteQ HDC2460',
+    license='MIT',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+             'axle_manager = axle_manager.hdc2460_node:main'
         ],
     },
 )
