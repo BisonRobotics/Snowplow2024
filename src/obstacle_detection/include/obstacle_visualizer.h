@@ -36,7 +36,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
-#include <visualization_msgs/MarkerArray.h>
+#include <visualization_msgs/MarkerArray.hpp>
 #include <obstacle_detector/Obstacles.h>
 
 namespace obstacle_detector

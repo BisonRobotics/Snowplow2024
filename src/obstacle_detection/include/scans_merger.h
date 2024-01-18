@@ -35,9 +35,9 @@
 
 #pragma once
 
-#include <rclcpp/rclcpp.h>
-#include <sensor_msgs/LaserScan.h>
-#include <sensor_msgs/PointCloud.h>
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msgs/LaserScan.hpp"
+#include "sensor_msgs/msgs/PointCloud.hpp"
 
 namespace obstacle_detector
 {

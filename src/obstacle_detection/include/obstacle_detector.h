@@ -55,8 +55,8 @@ public:
   ObstacleDetector();
 
 private:
-  void scanCallback(const sensor_msgs::LaserScan::ConstPtr& scan);
-  void pclCallback(const sensor_msgs::PointCloud::ConstPtr& pcl);
+  void scanCallback(const sensor_msgs::msg::LaserScan::ConstPtr& scan);
+  void pclCallback(const sensor_msgs::msg::PointCloud::ConstPtr& pcl);
   void updateParams();
 
   void processPoints();
@@ -73,14 +73,14 @@ private:
   void transformToWorld();
 
   // ROS handles
-  ros::NodeHandle nh_;
-  ros::NodeHandle nh_local_;
+  rclcpp::NodeHandle nh_;
+  rclcpp::NodeHandle nh_local_;
 
-  ros::Subscriber scan_sub_;
-  ros::Subscriber pcl_sub_;
-  ros::Publisher  obstacles_pub_;
+  rclcpp::Subscriber scan_sub_;
+  rclcpp::Subscriber pcl_sub_;
+  rclcpp::Publisher  obstacles_pub_;
 
-  tf::TransformListener tf_listener_;
+  tf2_ros::TransformListener tf_listener_;
 
   // Detector variables
   std::vector<Point> initial_points_;

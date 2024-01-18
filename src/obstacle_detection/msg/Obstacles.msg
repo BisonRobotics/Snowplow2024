@@ -1,4 +1,4 @@
-Header header
+std_msgs/Header header
 
-obstacle_detector/SegmentObstacle[] segments
-obstacle_detector/CircleObstacle[] circles
+SegmentObstacle[] segments
+CircleObstacle[] circles
