@@ -2,79 +2,141 @@ import math
 
 pi = math.pi
 turn_radius = 2
+radians = (pi/180)
 
 def direction(start_point, end_point):
     change = (end_point[0] - start_point[0], end_point[1] - start_point[1])
-   
+    
     if change[0] == 0:
-        return pi / 2
+        return math.pi / 2 if change[1] > 0 else 3 * math.pi / 2
+    return math.pi + math.atan(change[1] / change[0]) if change[0] < 0 else math.atan(change[1] / change[0])
 
-    return math.atan(change[1] / change[0])
-
-def circle_tuple(point_a, point_b, direction):
+# finds center point of a circle for the robot to drive around and the direction it should take
+def pivot_tuple(point_a, point_b, direction):
     #defining the circle
 
     # find first tuple
     rad_a = math.radians(direction + 90)
-    tuple_a = (point_b[0] + turn_radius * math.sin(rad_a), point_b[1] + turn_radius * math.cos(rad_a))
+    tuple_a = (point_b[0] + turn_radius * math.cos(rad_a), point_b[1] + turn_radius * math.sin(rad_a))
     
     # find second tuple
     rad_b = math.radians(direction - 90)
-    tuple_b = (point_b[0] + turn_radius * math.sin(rad_b), point_b[1] + turn_radius * math.cos(rad_b))
+    tuple_b = (point_b[0] + turn_radius * math.cos(rad_b), point_b[1] + turn_radius * math.sin(rad_b))
     
     # determine which tuple should be used and which direction
     if math.dist(point_a, tuple_a) <= math.dist(point_a, tuple_b):
-        return tuple_a, 1 #turn right one of these could possibly be inverted need to test
+        return tuple_a, -1 #turn left one of these could possibly be inverted need to test
     else:
-        return tuple_b, -1 # turn left
+        return tuple_b, 1 # turn right
 
+# determines the direction the robot should move in
 def final_direction(tuple, point, direction):
-    tuple_a = (tuple[0] + turn_radius * math.cos(direction), tuple[1] + turn_radius * math.sin(direction))
-    tuple_b = (tuple[0] - turn_radius * math.cos(direction), tuple[1] - turn_radius * math.sin(direction))
+    rad = math.radians(direction)
+    tuple_a = (tuple[0] + turn_radius * math.cos(rad), tuple[1] + turn_radius * math.sin(rad))
+    tuple_b = (tuple[0] - turn_radius * math.cos(rad), tuple[1] - turn_radius * math.sin(rad))
 
     if math.dist(point, tuple_a) <= math.dist(point, tuple_b):
         return 1 #forward
     else:
         return -1 #backward
 
+# calculates the tan points for the situation when both directions are the same
+def calc_tan_points(tuple_a, tuple_b):
+    rad = direction(tuple_a, tuple_b)
+
+    a = (tuple_a[0] + turn_radius * (math.cos(rad - pi / 2)), tuple_a[1] + turn_radius * (math.sin(rad - pi / 2))) #counterclockwise
+    b = (tuple_a[0] + turn_radius * (math.cos(rad + pi / 2)) , tuple_a[1] + turn_radius * (math.sin(rad + pi / 2))) #clockwise
+
+    return a, b
+
 def turn_path(start_point, start_direction, end_point, end_direction):
-    #defining the end circle
-    end_tuple, end_turn = circle_tuple(start_point, end_point, end_direction)
-    start_tuple, start_turn = circle_tuple(end_tuple, start_point, start_direction) 
+    end_tuple, end_turn = pivot_tuple(start_point, end_point, end_direction)
+    start_tuple, start_turn = pivot_tuple(end_tuple, start_point, start_direction) # not sure if it is end_tuple or end_point
 
-    root_two = 4 # dont worry about the name...
-    
-    # Determine if the same direction of turns are needed
     if start_turn == end_turn:
-        start_angle = direction(start_tuple, end_tuple) + start_turn * (pi / 2)
-        tan_point_start = (start_tuple[0] + root_two * turn_radius * math.cos(start_angle), start_tuple[1] + root_two * turn_radius * math.sin(start_angle))
-        
-        end_angle = direction(end_tuple, start_tuple) + end_turn * (pi / 2)
-        tan_point_end = (end_tuple[0] + root_two * turn_radius * math.cos(end_angle), end_tuple[1] + root_two * turn_radius * math.sin(end_angle))
+    # if ((start_tuple == start_tuplea and end_tuple == end_tuplea) or (start_tuple == start_tupleb and end_tuple == end_tupleb)):
+            
+        # tan_point_starta, tan_point_startb = calc_tan_points(start_tuple, end_tuple)
+        # tan_point_endb, tan_point_enda = calc_tan_points(end_tuple, start_tuple)
 
-    # If not then different math is needed :)
+        tan_point_starta = (start_tuple[0] + turn_radius * (math.cos(direction(start_tuple, end_tuple) - pi / 2)), start_tuple[1] + turn_radius * (math.sin(direction(start_tuple,end_tuple) - pi / 2))) #counterclockwise
+        tan_point_startb = (start_tuple[0] + turn_radius * (math.cos(direction(start_tuple, end_tuple) + pi / 2)) , start_tuple[1] + turn_radius * (math.sin(direction(start_tuple,end_tuple) + pi / 2))) #clockwise
+            
+        tan_point_endb = (end_tuple[0] + turn_radius * (math.cos(direction(end_tuple, start_tuple) - pi / 2)), end_tuple[1] + turn_radius * (math.sin(direction(end_tuple, start_tuple) - pi / 2))) #counterclockwise
+        tan_point_enda = (end_tuple[0] + turn_radius * (math.cos(direction(end_tuple, start_tuple) + pi / 2)), end_tuple[1] + turn_radius * (math.sin(direction(end_tuple, start_tuple) + pi / 2))) #clockwise
+        
+        # Determine which tan_points are preferable
+        if abs(direction(start_tuple, tan_point_starta) - direction(start_tuple,start_point) + math.radians(start_direction) - direction(tan_point_starta, tan_point_enda) % (2 * math.pi)) <= 0.0001:
+            tan_point_start = tan_point_starta
+            tan_point_end = tan_point_enda
+        else:
+            tan_point_start = tan_point_startb
+            tan_point_end = tan_point_endb
     else:
         hypotenuse = math.dist(start_tuple, end_tuple)
         short = 2 * turn_radius
         theta = math.atan2(end_tuple[1] - start_tuple[1], end_tuple[0] - start_tuple[0]) + math.asin(short / hypotenuse) - pi / 2
-        tan_point_start= (start_tuple[0] + root_two * turn_radius * math.cos(theta), start_tuple[1] + root_two * turn_radius * math.sin(theta))
-        tan_point_end = (end_tuple[0] + root_two * turn_radius * math.cos(theta + pi), end_tuple[1] + root_two * turn_radius * math.sin(theta + pi))
-    
+        tan_point_starta = (start_tuple[0] + turn_radius * math.cos(theta), start_tuple[1] + turn_radius * math.sin(theta))
+        tan_point_enda = (end_tuple[0] + turn_radius * math.cos(theta+pi), end_tuple[1] + turn_radius * math.sin(theta + pi))
+        if abs((direction(start_tuple, tan_point_starta) - direction(start_tuple, start_point) + math.radians(start_direction) - direction(tan_point_starta, tan_point_enda))) % (2 * math.pi) <= 0.0001:
+            tan_point_start = tan_point_starta
+            tan_point_end = tan_point_enda
+        else: 
+                
+            if end_tuple[0]-start_tuple[0] == 0:
+                inv_slope = 0
+                b2 = tan_point_starta[1] - inv_slope * tan_point_starta[0]
+                b3 = tan_point_enda[1] - inv_slope * tan_point_enda[0] 
+                tan_point_startb = 2 * start_tuple[0] - tan_point_starta[0], b2
+                tan_point_endb = 2 * start_tuple[0] - tan_point_enda[0], b3
+            else: 
+                slope = (end_tuple[1] - start_tuple[1]) / (end_tuple[0] - start_tuple[0])
+                b1 = start_tuple[1] - slope * start_tuple[0]
+                
+                if slope != 0:
+                    inv_slope = -1 / slope
+                    b2 = tan_point_starta[1] - inv_slope * tan_point_starta[0]
+                    b3 = tan_point_enda[1] - inv_slope * tan_point_enda[0] 
+                    intersectionstart = ((b2 - b1) / (slope - inv_slope),0)
+                    intersectionend = ((b3 - b1) / (slope - inv_slope),0)
+                    intersectionstart= (intersectionstart[0],intersectionstart[0] * slope + b1)
+                    intersectionend = (intersectionend[0], intersectionend[0] * slope + b1) 
+                    tan_point_startb = (2 * intersectionstart[0]- tan_point_starta[0], 2 * intersectionstart[1] - tan_point_starta[1])
+                    tan_point_endb = (2 * intersectionend[0] - tan_point_enda[0],2 * intersectionend[1]- tan_point_enda[1])
+                else:
+                    tan_point_startb = (tan_point_starta[0],start_tuple[1]*2-tan_point_starta[1])
+                    tan_point_endb = (tan_point_enda[0],end_tuple[1]*2-tan_point_enda[1])
+
+            tan_point_start = tan_point_startb
+            tan_point_end = tan_point_endb
+  
     # Find the initial direction the robot needs to move in
     direction_movement_start = final_direction(start_tuple, tan_point_start, start_direction)
-    direction_movement_end = -1 * final_direction(end_tuple, tan_point_end, end_direction) # needs to be reversed
+    direction_movement_end = -final_direction(end_tuple, tan_point_end, end_direction) 
     
-    return (start_turn, direction_movement_start, tan_point_start, tan_point_end, direction_movement_end, end_turn, end_point)
+    distance1 = turn_radius * (round((direction(start_tuple, tan_point_start) - direction(start_tuple, start_point)), 3) % (2*pi))
+    distance2 = math.dist(tan_point_start, tan_point_end)
+    distance3 = turn_radius*(round((direction(end_tuple, tan_point_end) - direction(end_tuple, end_point)), 3) % (2*pi))
+    #return (start_turn, direction_movement_start, tan_point_start, tan_point_end, direction_movement_end, end_turn, end_point)
+    return (start_turn, direction_movement_start, distance1, 0, 1, distance2, end_turn, direction_movement_end, distance3)
 
 # outputs starting turn direction, point which robot starts going straight, point robot stops going straight, ending turn direction, destination
 #right = 1 left = -1
 
+
+
 if __name__ == "__main__":
-    start_turn, direction_movement_start, tan_point_start, tan_point_end, direction_movement_end, end_turn, end_point = turn_path((3,4),90,(8,10),0)
+    # test = turn_path((0,0),90,(0.5,0),90)
+    test = turn_path((0,0),0,(0,0.5),45)
+    start_turn,direction_movement_start,distance1,mid_turn,direction_movement_mid,distance2,end_turn,direction_movement_end,distance3 = test
+
+    # Verbose
     print(f"Start turn: {start_turn}")
-    print(f"End turn: {end_turn}")
-    print(f"Tan point start: {tan_point_start}")
-    print(f"Tan point end: {tan_point_end}")
     print(f"Direction movement start: {direction_movement_start}")
+    print(f"Distance of segment 1: {distance1}")
+    print(f"Middle turn: {mid_turn}")
+    print(f"Direction movement mid: {direction_movement_mid}")
+    print(f"Distance of segment 2: {distance2}")
+    print(f"End turn: {end_turn}")
     print(f"Direction movement end: {direction_movement_end}")
-    print(f"End point: {end_point}")
+    print(f"Distance of segment 3: {distance3}")
