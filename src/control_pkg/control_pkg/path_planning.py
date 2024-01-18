@@ -170,9 +170,15 @@ def turn_path(start_point, start_direction, end_point, end_direction):
     # direction_movement_start = final_direction(start_tuple, tan_point_start, start_direction)
     # direction_movement_end = final_direction(end_tuple, tan_point_end, end_direction) 
 
-    distance1 = turn_radius * (round((direction(start_tuple, tan_point_start) - direction(start_tuple, start_point)), 3) % (2*pi))
-    distance2 = math.dist(tan_point_start, tan_point_end)
-    distance3 = turn_radius*(round((direction(end_tuple, tan_point_end) - direction(end_tuple, end_point)), 3) % (2*pi))
+    distance1 = round(turn_radius * (round((direction(start_tuple, tan_point_start) - direction(start_tuple, start_point)), 3) % (2*pi)), 3)
+    if (distance1 > 2*pi):
+        distance1 = 12.567 - distance1
+        direction_movement_start = direction_movement_start * -1
+    distance2 = round(math.dist(tan_point_start, tan_point_end),3)
+    distance3 = round(turn_radius*(round((direction(end_tuple, tan_point_end) - direction(end_tuple, end_point)), 3) % (2*pi)),3) 
+    if (distance3 > 2*pi):
+        distance3 = round(12.567 - distance3 , 3)
+        direction_movement_end = direction_movement_end * -1
     #return (start_turn, direction_movement_start, tan_point_start, tan_point_end, direction_movement_end, end_turn, end_point)
     return (start_turn, direction_movement_start, distance1, 0, 1, distance2, end_turn, direction_movement_end, distance3)
 # outputs starting turn direction, point which robot starts going straight, point robot stops going straight, ending turn direction, destination
@@ -182,7 +188,7 @@ def turn_path(start_point, start_direction, end_point, end_direction):
 
 if __name__ == "__main__":
    # start_turn,direction_movement_start,tan_point_start,tan_point_end,direction_movement_end,end_turn,end_point = turn_path((0,6),0,(8,6),180)
-    start_turn,direction_movement_start,distance1,mid_turn,direction_movement_mid,distance2,end_turn,direction_movement_end,distance3 = turn_path((0,0),90,(0.5,0),90)
+    start_turn,direction_movement_start,distance1,mid_turn,direction_movement_mid,distance2,end_turn,direction_movement_end,distance3 = turn_path((0,0),0,(0,0.5),45)
 
     # Verbose
     print(f"Start turn: {start_turn}")
