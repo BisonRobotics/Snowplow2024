@@ -1,7 +1,7 @@
 import math
 
 pi = math.pi
-turn_radius = 2
+turn_radius = 2.25
 radians = (pi/180)
 
 def direction(start_point, end_point):
@@ -93,16 +93,6 @@ def turn_path(start_point, start_direction, end_point, end_direction):
         tan_point_endb = (end_tuple[0] + turn_radius * (math.cos(direction(end_tuple, start_tuple) - pi / 2)), end_tuple[1] + turn_radius * (math.sin(direction(end_tuple, start_tuple) - pi / 2))) #counterclockwise
             
         tan_point_enda = (end_tuple[0] + turn_radius * (math.cos(direction(end_tuple, start_tuple) + pi / 2)), end_tuple[1] + turn_radius * (math.sin(direction(end_tuple, start_tuple) + pi / 2))) #clockwise
-        
-        _a = direction(start_tuple, tan_point_starta)
-        _b = direction(start_tuple, start_point)
-        _c = _a - _b
-        _d = math.radians(start_direction)
-        _e = _c + _d
-        _f = direction(tan_point_starta, tan_point_enda)
-        _g = _e - _f
-        _h = abs(_g)
-        _i = _h % (2 * math.pi)
 
         #c = abs(direction(start_tuple,tan_point_starta)-direction(start_tuple,start_point)+ math.radians(start_direction) - direction(tan_point_starta,tan_point_enda))%(2*math.pi)
         if abs(direction(start_tuple, tan_point_starta) - direction(start_tuple,start_point) + math.radians(start_direction) - direction(tan_point_starta, tan_point_enda) )% (2 * math.pi) <= 0.0001:
@@ -168,17 +158,33 @@ def turn_path(start_point, start_direction, end_point, end_direction):
     # --- UNTESTED CODE TO REDUCE THE STUFF BEFORE ---
     # Find the initial direction the robot needs to move in
     # direction_movement_start = final_direction(start_tuple, tan_point_start, start_direction)
-    # direction_movement_end = final_direction(end_tuple, tan_point_end, end_direction) 
-
-    distance1 = round(turn_radius * (round((direction(start_tuple, tan_point_start) - direction(start_tuple, start_point)), 3) % (2*pi)), 3)
-    if (distance1 > 2*pi):
-        distance1 = 12.567 - distance1
-        direction_movement_start = direction_movement_start * -1
+    # direction_movement_end = final_direction(end_tuple, tan_point_end, end_direction)
+    distance1, distance3 = 0, 0
+    
+    if start_turn == -1:
+        distance1 = round(turn_radius * (round((direction(start_tuple, tan_point_start) - direction(start_tuple, start_point)), 3) % (2*pi)), 3)
+        if (distance1 > turn_radius * pi):
+            distance1 = 2 * turn_radius * pi - distance1
+            direction_movement_start = direction_movement_start * -1
+    else:
+        distance1 = round(turn_radius * (round((direction(start_tuple, start_point) - direction(start_tuple, tan_point_start)), 3) % (2*pi)), 3)
+        if (distance1 > turn_radius * pi):
+            distance1 = 2 * turn_radius * pi - distance1
+            direction_movement_start = direction_movement_start * -1
+    
     distance2 = round(math.dist(tan_point_start, tan_point_end),3)
-    distance3 = round(turn_radius*(round((direction(end_tuple, tan_point_end) - direction(end_tuple, end_point)), 3) % (2*pi)),3) 
-    if (distance3 > 2*pi):
-        distance3 = round(12.567 - distance3 , 3)
-        direction_movement_end = direction_movement_end * -1
+    
+    if end_turn == -1:
+        distance3 = round(turn_radius * (round((direction(end_tuple, end_point) - direction(end_tuple, tan_point_end)), 3) % (2*pi)), 3)
+        if (distance3 > turn_radius * pi):
+            distance3 = round(2 * turn_radius * pi - distance3 , 3)
+            direction_movement_end = direction_movement_end * -1
+    else:
+        distance3 = round(turn_radius * (round((direction(end_tuple, tan_point_end) - direction(end_tuple, end_point)), 3) % (2*pi)), 3)
+        if (distance3 > turn_radius * pi):
+            distance3 = round(2 * turn_radius * pi - distance3 , 3)
+            direction_movement_end = direction_movement_end * -1
+            
     #return (start_turn, direction_movement_start, tan_point_start, tan_point_end, direction_movement_end, end_turn, end_point)
     return (start_turn, direction_movement_start, distance1, 0, 1, distance2, end_turn, direction_movement_end, distance3)
 # outputs starting turn direction, point which robot starts going straight, point robot stops going straight, ending turn direction, destination
@@ -188,7 +194,7 @@ def turn_path(start_point, start_direction, end_point, end_direction):
 
 if __name__ == "__main__":
    # start_turn,direction_movement_start,tan_point_start,tan_point_end,direction_movement_end,end_turn,end_point = turn_path((0,6),0,(8,6),180)
-    start_turn,direction_movement_start,distance1,mid_turn,direction_movement_mid,distance2,end_turn,direction_movement_end,distance3 = turn_path((0,0),0,(0,0.5),45)
+    start_turn,direction_movement_start,distance1,mid_turn,direction_movement_mid,distance2,end_turn,direction_movement_end,distance3 = turn_path((0.14,-2.5),90,(-2.5,2),180)
 
     # Verbose
     print(f"Start turn: {start_turn}")
