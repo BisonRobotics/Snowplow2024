@@ -91,7 +91,7 @@ class Runner:
     def __init__(self):
         self.commands: list[Command] = []
         
-    def start(self, command: Command):
+    def start_command(self, command: Command):
         self.commands.append(command)
         command.initialize()
         
