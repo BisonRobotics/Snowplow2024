@@ -49,7 +49,6 @@ class PathAuto(Node):
     def determine_control(self):
         if not self.pivot_updated or self.position is None:
             return
-        path = None
         match self.state:
             case 0:
                 self.get_logger().info('turning to 0 degrees')
@@ -139,24 +138,24 @@ class PathAuto(Node):
                 self.wait_time(2)
                 return
             case 19:
-                self.get_logger().info('driving at -100% speed for 1.5 meters')
-                self.drive_distance(-1.0, 1.5)
+                self.get_logger().info('turning to -22 degrees')
+                self.turn_to_degrees(-22)
                 return
             case 20:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 21:
-                self.get_logger().info('turning to -18.624 degrees')
-                self.turn_to_degrees(-18.624)
+                self.get_logger().info('driving at 100% speed for 1/8th of a turn')
+                self.drive_distance(1.0, 3.14 * 1.90475 / 4)
                 return
             case 22:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 23:
-                self.get_logger().info('driving at -100% speed for 3.14')
-                self.drive_distance(-1.0, 2.25 * 3.14 / 2)
+                self.get_logger().info('driving at -100% speed for 1/8th of a turn')
+                self.drive_distance(-1.0, 3.14 * 1.90475 / 4)
                 return
             case 24:
                 self.get_logger().info('waiting for 2 seconds')
@@ -171,127 +170,191 @@ class PathAuto(Node):
                 self.wait_time(2)
                 return
             case 27:
-                self.get_logger().info('driving at -100% speed for 2 meters')
-                self.drive_distance(-1.0, 2)
+                self.get_logger().info('driving at -100% speed for 1.5 meters')
+                self.drive_distance(-1.0, 1.5)
                 return
             case 28:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 29:
+                self.get_logger().info('turning to -18.624 degrees')
+                self.turn_to_degrees(-18.624)
+                return
+            case 30:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 31:
+                self.get_logger().info('driving at -100% speed for 90 degree turn')
+                self.drive_distance(-1.0, 2.25 * 3.14 / 2)
+                return
+            case 32:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 33:
+                self.get_logger().info('turning to 0 degrees')
+                self.turn_to_degrees(0)
+                return
+            case 34:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 35:
+                self.get_logger().info('driving at -100% speed for 2 meters')
+                self.drive_distance(-1.0, 1.5)
+                return
+            case 36:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 37:
                 self.get_logger().info('generating path')
                 self.path = turn_path(start_point=(self.position.linear.x, self.position.linear.z), start_direction=self.position.angular.y, end_point=(self.right_waypoint.linear.x, self.right_waypoint.linear.z), end_direction=self.right_waypoint.angular.y)
                 self.state += 1
                 return
-            case 30:
+            case 38:
                 self.get_logger().info('running first segment of the path')
                 if self.path[2] < 0.2:
                     self.state += 3
                 else:
                     self.turn_to_degrees(self.path[0] * 18.624)
                 return
-            case 31:
+            case 39:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
-            case 32:
+            case 40:
                 self.get_logger().info('running first segment of the path')
                 self.drive_distance(self.path[1] * 1.0, self.path[2])
                 return
-            case 33:
+            case 41:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
-            case 34:
+            case 42:
                 self.get_logger().info('running second segment of the path')
                 if self.path[5] < 0.2:
                     self.state += 3
                 else:
                     self.turn_to_degrees(self.path[3] * 18.624)
                 return
-            case 35:
-                self.get_logger().info('waiting for 2 seconds')
-                self.wait_time(2)
-                return
-            case 36:
-                self.get_logger().info('running second segment of the path')
-                self.drive_distance(self.path[4] * 1.0, self.path[5])
-                return
-            case 37:
-                self.get_logger().info('waiting for 2 seconds')
-                self.wait_time(2)
-                return
-            case 38:
-                self.get_logger().info('running the third segment of the path')
-                if self.path[8] < 0.2:
-                    self.state += 3
-                else:
-                    self.turn_to_degrees(self.path[6] * 18.624)
-                return
-            case 39:
-                self.get_logger().info('waiting for 2 seconds')
-                self.wait_time(2)
-                return
-            case 40:
-                self.get_logger().info('running the third segment of the path')
-                self.drive_distance(self.path[7] * 1.0, self.path[8])
-                return
-            case 41:
-                self.get_logger().info('waiting for 2 seconds')
-                self.wait_time(2)
-                self.path = None
-                return
-            case 42:
-                self.get_logger().info('turning to 0 degrees')
-                self.turn_to_degrees(0)
-                return
             case 43:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 44:
-                self.get_logger().info('driving at 100% speed for 2 meters')
-                self.drive_distance(1.0, 2)
+                self.get_logger().info('running second segment of the path')
+                self.drive_distance(self.path[4] * 1.0, self.path[5])
                 return
             case 45:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 46:
-                self.get_logger().info('driving at -100% speed for 2.5 meters')
-                self.drive_distance(-1.0, 2.5)
+                self.get_logger().info('running the third segment of the path')
+                if self.path[8] < 0.2:
+                    self.state += 3
+                else:
+                    self.turn_to_degrees(self.path[6] * 18.624)
                 return
             case 47:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 48:
-                self.get_logger().info('turning to 18.624 degrees')
-                self.turn_to_degrees(18.624)
+                self.get_logger().info('running the third segment of the path')
+                self.drive_distance(self.path[7] * 1.0, self.path[8])
                 return
             case 49:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
+                self.path = None
                 return
             case 50:
-                self.get_logger().info('driving at -100% speed for 3.14 meters')
-                self.drive_distance(-1.0, 2.25 * 3.14 / 2)
+                self.get_logger().info('turning to 0 degrees')
+                self.turn_to_degrees(0)
                 return
             case 51:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 52:
-                self.get_logger().info('turning to 0 degrees')
-                self.turn_to_degrees(0)
+                self.get_logger().info('driving at 100% speed for 2 meters')
+                self.drive_distance(1.0, 2)
                 return
             case 53:
                 self.get_logger().info('waiting for 2 seconds')
                 self.wait_time(2)
                 return
             case 54:
+                self.get_logger().info('turning to -22 degrees')
+                self.turn_to_degrees(-22)
+                return
+            case 55:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 56:
+                self.get_logger().info('driving at 100% speed for 1/8th of a turn')
+                self.drive_distance(1.0, 3.14 * 1.90475 / 4)
+                return
+            case 57:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 58:
+                self.get_logger().info('driving at -100% speed for 1/8th of a turn')
+                self.drive_distance(-1.0, 3.14 * 1.90475 / 4)
+                return
+            case 59:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 60:
+                self.get_logger().info('turning to 0 degrees')
+                self.turn_to_degrees(0)
+                return
+            case 61:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 62:
+                self.get_logger().info('driving at -100% speed for 2.5 meters')
+                self.drive_distance(-1.0, 2.5)
+                return
+            case 63:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 64:
+                self.get_logger().info('turning to 18.624 degrees')
+                self.turn_to_degrees(18.624)
+                return
+            case 65:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 66:
+                self.get_logger().info('driving at -100% speed for 90 degree turn')
+                self.drive_distance(-1.0, 2.25 * 3.14 / 2)
+                return
+            case 67:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 68:
+                self.get_logger().info('turning to 0 degrees')
+                self.turn_to_degrees(0)
+                return
+            case 69:
+                self.get_logger().info('waiting for 2 seconds')
+                self.wait_time(2)
+                return
+            case 70:
                 self.get_logger().info('driving at -100% speed for 2 meters')
-                self.drive_distance(-1.0, 2)
+                self.drive_distance(-1.0, 1.5)
                 return
             case _:
                 self.get_logger().info('done')
