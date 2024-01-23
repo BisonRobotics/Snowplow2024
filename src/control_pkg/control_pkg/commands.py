@@ -43,6 +43,7 @@ class SequentialCommandGroup(Command):
     def execute(self):
         current_command: Command | None = self.commands[0] if len(self.commands) > 0 else None
         while current_command is not None and current_command.is_finished():
+            current_command.end()
             self.commands.remove(current_command)
             current_command = self.commands[0] if len(self.commands) > 0 else None
             current_command.initialize()
