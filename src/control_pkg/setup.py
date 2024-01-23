@@ -22,6 +22,8 @@ setup(
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
+            'auto = control_pkg.path_auto:main',
+            'fqr = control_pkg.fqr:main'
         ],
     },
 )
