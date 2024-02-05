@@ -5,6 +5,9 @@ from utilities.tools import Tools
 degree_deadband = 0.2
 
 class TurnToDegreesCommand(Command):
+    """
+    Command that turns the pivot to the given degrees
+    """
     def __init__(self, degrees: float, get_pivot_degrees: Callable[[], float], drive_pivot: Callable[[int], None]):
         super().__init__()
         self.target_degrees = degrees

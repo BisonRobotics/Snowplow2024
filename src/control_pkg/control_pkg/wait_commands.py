@@ -3,6 +3,9 @@ from time import time
 from typing import Callable
 
 class WaitCommand(Command):
+    """
+    Command that does nothing for the given number of seconds
+    """
     def __init__(self, wait_time: float):
         super().__init__()
         self.wait_time = wait_time
@@ -14,6 +17,9 @@ class WaitCommand(Command):
         return time() >= self.end_time
     
 class WaitUntilCommand(Command):
+    """
+    Command that waits until the given condition is true
+    """
     def __init__(self, condition: Callable[[], bool]):
         super().__init__()
         self.condition = condition

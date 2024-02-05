@@ -9,6 +9,9 @@ from time import time
 from math import sqrt
 
 class DriveTimeCommand(Command):
+    """
+    Command that drives the vehicle at the given speed for the given time
+    """
     def __init__(self, speed: float, drive_time: float, drive: Callable[[float], None]):
         super().__init__()
         self.speed = speed
@@ -34,6 +37,9 @@ acceleration = 1/3
 deceleration = 1
         
 class DriveDistanceCommand(DriveTimeCommand):
+    """
+    Command that drives the vehicle the given distance at the given speed
+    """
     def __init__(self, speed: float, distance: float, drive: Callable[[float], None]):
         super().__init__(speed=speed, drive_time=self.calculate_time(speed, distance), drive=drive)
         
@@ -52,6 +58,9 @@ class DriveDistanceCommand(DriveTimeCommand):
 max_turn = 18.25
 
 class DriveToWaypointCommand(SequentialCommandGroup):
+    """
+    Command that drives the vehicle to the given waypoint
+    """
     def __init__(self, waypoint: Twist, get_position: Callable[[], Twist], get_pivot_position: Callable[[], float], drive_pivot: Callable[[int], None], drive: Callable[[float], None]):
         super().__init__()
         self.waypoint = waypoint
