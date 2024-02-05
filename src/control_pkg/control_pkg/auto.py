@@ -41,56 +41,62 @@ class Auto(Node):
         right_waypoint.linear.z = 2
         right_waypoint.angular.y = 0
         
-        return WaitUntilCommand(lambda : self.position_updated and self.pivot_position_updated)\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot, self.get_logger().info))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveToWaypointCommand(left_waypoint, self.get_position, self.get_pivot_position, self.drive_pivot, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(1, 2, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(-22, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(1, 3.14 * 1.90475 / 4, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 3.14 * 1.90471 / 4, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 1.5, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(-18.624, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 2.25 * 3.14 / 2, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 1.5, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveToWaypointCommand(right_waypoint, self.get_position, self.get_pivot_position, self.drive_pivot, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(1, 2, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(-22, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(1, 3.14 * 1.90475 / 4, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 3.14 * 1.90475 / 4, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 1.5, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(18.624, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 2.25 * 3.14 / 2, self.drive))\
-                .and_then(WaitCommand(2))\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
-                .and_then(WaitCommand(2))\
-                .and_then(DriveDistanceCommand(-1, 1.5, self.drive))
+        wait = lambda time_seconds : WaitCommand(time_seconds)
+        turn_to_degrees = lambda degrees : TurnToDegreesCommand(degrees, self.get_pivot_position, self.drive_pivot)
+        drive_to_waypoint = lambda waypoint : DriveToWaypointCommand(waypoint, self.get_position, self.get_pivot_position, self.drive_pivot, self.drive)
+        drive_distance = lambda speed, distance : DriveDistanceCommand(speed, distance, self.drive)
+        wait_until = lambda condition : WaitUntilCommand(condition)
+        
+        return wait_until(lambda : self.position_updated and self.pivot_position_updated)\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_to_waypoint(left_waypoint))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(1, 2))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(-22))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(1, 3.14 * 1.90475 / 4))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 3.14 * 1.90471 / 4))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 1.5))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(-18.624))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 2.25 * 3.14 / 2))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 1.5))\
+                .and_then(wait(2))\
+                .and_then(drive_to_waypoint(right_waypoint))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(1, 2))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(-22))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(1, 3.14 * 1.90475 / 4))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 3.14 * 1.90475 / 4))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 1.5))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(18.624))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 2.25 * 3.14 / 2))\
+                .and_then(wait(2))\
+                .and_then(turn_to_degrees(0))\
+                .and_then(wait(2))\
+                .and_then(drive_distance(-1, 1.5))
     
     def drive_pivot(self, speed):
         msg = Int8()

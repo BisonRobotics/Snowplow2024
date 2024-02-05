@@ -5,12 +5,11 @@ from utilities.tools import Tools
 degree_deadband = 0.2
 
 class TurnToDegreesCommand(Command):
-    def __init__(self, degrees: float, get_pivot_degrees: Callable[[], float], drive_pivot: Callable[[int], None], logger = lambda : None):
+    def __init__(self, degrees: float, get_pivot_degrees: Callable[[], float], drive_pivot: Callable[[int], None]):
         super().__init__()
         self.target_degrees = degrees
         self.get_pivot_degrees = lambda : Tools.potentiometer_to_degrees(get_pivot_degrees())
         self.drive_pivot = drive_pivot
-        self.logger = logger
         
     def in_deadband(self) -> bool:
         return abs(self.get_pivot_degrees() - self.target_degrees) <= degree_deadband
