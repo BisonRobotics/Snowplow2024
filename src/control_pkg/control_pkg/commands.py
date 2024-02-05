@@ -46,7 +46,8 @@ class SequentialCommandGroup(Command):
             current_command.end()
             self.commands.remove(current_command)
             current_command = self.commands[0] if len(self.commands) > 0 else None
-            current_command.initialize()
+            if current_command is not None:
+                current_command.initialize()
         if current_command is not None:
             current_command.execute()
 
@@ -54,7 +55,7 @@ class SequentialCommandGroup(Command):
         return len(self.commands) == 0
     
     def end(self):
-        if self.commands[0] is not None:
+        if len(self.commands) > 0:
             self.commands[0].end()
 
 class ParallelCommandGroup(Command):

@@ -6,8 +6,8 @@ from geometry_msgs.msg import Twist
 
 from control_pkg.commands import Runner, Command
 from control_pkg.drive_commands import DriveDistanceCommand, DriveToWaypointCommand
-from control_pkg.control_pkg.wait_commands import WaitCommand, WaitUntilCommand
-from control_pkg.control_pkg.turn_command import TurnToDegreesCommand
+from control_pkg.wait_commands import WaitCommand, WaitUntilCommand
+from control_pkg.turn_command import TurnToDegreesCommand
 
 class Auto(Node):
     def __init__(self):
@@ -42,7 +42,7 @@ class Auto(Node):
         right_waypoint.angular.y = 0
         
         return WaitUntilCommand(lambda : self.position_updated and self.pivot_position_updated)\
-                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot))\
+                .and_then(TurnToDegreesCommand(0, self.get_pivot_position, self.drive_pivot, self.get_logger().info))\
                 .and_then(WaitCommand(2))\
                 .and_then(DriveToWaypointCommand(left_waypoint, self.get_position, self.get_pivot_position, self.drive_pivot, self.drive))\
                 .and_then(WaitCommand(2))\

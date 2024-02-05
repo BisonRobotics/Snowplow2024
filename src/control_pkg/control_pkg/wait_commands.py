@@ -4,7 +4,7 @@ from typing import Callable
 
 class WaitCommand(Command):
     def __init__(self, wait_time: float):
-        super().__init__(self)
+        super().__init__()
         self.wait_time = wait_time
         
     def initialize(self):

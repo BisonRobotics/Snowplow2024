@@ -2,8 +2,8 @@ from geometry_msgs.msg import Twist
 
 from control_pkg.path_planning import turn_path
 from control_pkg.commands import Command, SequentialCommandGroup
-from control_pkg.control_pkg.wait_commands import WaitCommand
-from control_pkg.control_pkg.turn_command import TurnToDegreesCommand
+from control_pkg.wait_commands import WaitCommand
+from control_pkg.turn_command import TurnToDegreesCommand
 from typing import Callable
 from time import time
 from math import sqrt
