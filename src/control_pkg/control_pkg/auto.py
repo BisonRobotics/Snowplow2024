@@ -58,7 +58,7 @@ class Auto(Node):
         drive_to_waypoint = lambda waypoint : DriveToWaypointCommand(waypoint, self.get_position, self.get_pivot_position, self.drive_pivot, self.drive)
         drive_distance = lambda speed, distance : DriveDistanceCommand(speed, distance, self.drive)
         wait_until = lambda condition : WaitUntilCommand(condition)
-        
+
         # Creating and returning command
         return wait_until(lambda : self.position_updated and self.pivot_position_updated)\
                 .and_then(turn_to_degrees(0))\

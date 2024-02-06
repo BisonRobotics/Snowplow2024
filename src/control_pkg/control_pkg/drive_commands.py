@@ -14,7 +14,7 @@ class DriveTimeCommand(Command):
     """
     def __init__(self, speed: float, drive_time: float, drive: Callable[[float], None]):
         super().__init__()
-        self.speed = speed
+        self.speed = float(speed)
         self.drive_time = drive_time
         self.drive = drive
         
@@ -28,12 +28,12 @@ class DriveTimeCommand(Command):
         return time() >= self.end_time
     
     def end(self):
-        self.drive(0)
+        self.drive(float(0))
 
 # measured in m/s
 top_speed = 1
 # measured in m/s/s
-acceleration = 1/3
+acceleration = 3
 deceleration = 1
         
 class DriveDistanceCommand(DriveTimeCommand):
@@ -44,7 +44,7 @@ class DriveDistanceCommand(DriveTimeCommand):
         super().__init__(speed=speed, drive_time=self.calculate_time(speed, distance), drive=drive)
         
     def calculate_time(self, speed, distance) -> float:
-        real_speed = speed * top_speed
+        real_speed = abs(speed) * top_speed
         
         acceleration_time = real_speed / acceleration
         deceleration_time = real_speed / deceleration
@@ -103,7 +103,7 @@ class DriveToWaypointCommand(SequentialCommandGroup):
             needed_segments.append(path_segment_3)
             
         for i in range(len(needed_segments)):
-            if i != len(needed_segments - 1):
+            if i != len(needed_segments) - 1:
                 needed_segments[i].add_command(WaitCommand(2))
             self.add_command(needed_segments[i])
             
