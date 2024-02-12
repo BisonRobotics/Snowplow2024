@@ -21,7 +21,7 @@ pivot_z_offset = 0.83
 class ApriltagPublisher(Node):
     def __init__(self):
         super().__init__('apriltag_publisher')
-        self.publisher_ = self.create_publisher(Point, '/apriltag', 10)
+        self.publisher_ = self.create_publisher(Twist, '/apriltag', 10)
         timer_period = 0.5
         self.latest_frame = None
         threading.Thread(target=self.keep_up_thread).start()

@@ -7,10 +7,10 @@ import os.path
 
 def generate_launch_description():
     #Auto control node
-    start_auto_node = Node(
+    start_fqr_node = Node(
         package='control_pkg',
-        executable='auto',
-        name='auto'
+        executable='fqr',
+        name='fqr'
     )
     
     #Axle manager for Hyflex node
@@ -35,6 +35,6 @@ def generate_launch_description():
 
     #declare launch actions
     ld.add_action(start_axle_manager_node)
-    ld.add_action(start_auto_node)
+    ld.add_action(start_fqr_node)
 
     return ld
